@@ -57,7 +57,21 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 4. Leer valores del .env para reemplazar placeholders en .mcp.json
+# 4. Validar variables obligatorias no vacías
+# -----------------------------------------------------------------------------
+MISSING=()
+for VAR in PROJECT_NAME DB_POSTGRESDB_PASSWORD N8N_BASIC_AUTH_PASSWORD; do
+  VAL=$(grep -E "^${VAR}=" "$ENV_FILE" | cut -d'=' -f2 | tr -d '[:space:]')
+  [ -z "$VAL" ] && MISSING+=("$VAR")
+done
+
+if [ ${#MISSING[@]} -gt 0 ]; then
+  error "Las siguientes variables están vacías en .env: ${MISSING[*]}
+       Completálas y reejecutá: ./scripts/init.sh"
+fi
+
+# -----------------------------------------------------------------------------
+# 5. Leer valores del .env para reemplazar placeholders en .mcp.json
 # -----------------------------------------------------------------------------
 source <(grep -E '^(N8N_PORT|N8N_API_KEY)=' "$ENV_FILE" | sed 's/[[:space:]]//g')
 
@@ -82,12 +96,12 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 5. Crear directorios de volúmenes si no existen
+# 6. Crear directorios de volúmenes si no existen
 # -----------------------------------------------------------------------------
 mkdir -p "$ROOT_DIR/volumes/n8n_data" "$ROOT_DIR/volumes/postgres_data" "$ROOT_DIR/local-files"
 
 # -----------------------------------------------------------------------------
-# 6. Instrucciones finales
+# 7. Instrucciones finales
 # -----------------------------------------------------------------------------
 echo ""
 info "=== Setup completo ==="

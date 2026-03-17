@@ -307,18 +307,18 @@ Pasos ordenados para construir el template funcional. Indica quién ejecuta cada
   - Imprime instrucciones del siguiente paso
 
 ### Fase 4 — Primera prueba de la instancia
-- [ ] **[YO]** Copiar `.env.example` a `.env`, asignar `PROJECT_NAME`, `N8N_PORT=5678`, contraseñas
-- [ ] **[YO]** Ejecutar `./scripts/init.sh`
-- [ ] **[YO]** Ejecutar `docker compose up -d` y verificar que los contenedores levanten
-- [ ] **[YO]** Acceder a `http://localhost:5678`, completar setup inicial de n8n
-- [ ] **[YO]** Generar API key desde UI de n8n → Settings > API > Create API Key
-- [ ] **[YO]** Agregar `N8N_API_KEY` al `.env`
+- [x] **[YO]** Copiar `.env.example` a `.env`, asignar `PROJECT_NAME`, `N8N_PORT=5678`, contraseñas
+- [x] **[YO]** Ejecutar `./scripts/init.sh`
+- [x] **[YO]** Ejecutar `docker compose up -d` y verificar que los contenedores levanten
+- [x] **[YO]** Acceder a `http://localhost:5678`, completar setup inicial de n8n
+- [x] **[YO]** Generar API key desde UI de n8n → Settings > API > Create API Key
+- [x] **[YO]** Agregar `N8N_API_KEY` al `.env`
 
 ### Fase 5 — Integración n8n-mcp
-- [ ] **[YO]** Reejecutar `./scripts/init.sh` (o actualizar `.mcp.json` manualmente con la API key)
-- [ ] **[YO]** Reiniciar Claude Code para que cargue el `.mcp.json` actualizado
-- [ ] **[YO+CLAUDE]** Verificar que n8n-mcp esté activo: pedir a Claude que ejecute `n8n_health_check`
-- [ ] **[YO+CLAUDE]** Crear un workflow de prueba simple desde Claude Code usando `n8n_create_workflow`
+- [x] **[YO]** Reejecutar `./scripts/init.sh` (o actualizar `.mcp.json` manualmente con la API key)
+- [x] **[YO]** Reiniciar Claude Code para que cargue el `.mcp.json` actualizado
+- [x] **[YO+CLAUDE]** Verificar que n8n-mcp esté activo: pedir a Claude que ejecute `n8n_health_check`
+- [x] **[YO+CLAUDE]** Crear un workflow de prueba simple desde Claude Code usando `n8n_create_workflow`
 
 ### Fase 6 — README
 - [ ] **[CLAUDE]** Crear `README.md` con:
@@ -335,5 +335,67 @@ Pasos ordenados para construir el template funcional. Indica quién ejecuta cada
 
 ---
 
+## 10. Hints para documentación futura (README)
+
+> Notas de referencia a incorporar al redactar el README en Fase 6.
+
+### Modelo template vs instancia
+
+El repo tiene dos "estados" bien diferenciados que el README debe comunicar claramente:
+
+**Estado template** (lo que está en el repo commiteado):
+- `.env.example`, `.mcp.json` con placeholders, `docker-compose.yml`, `scripts/`
+- Sin `.env`, sin claves reales, sin datos en volúmenes
+- Es lo que clona cualquier usuario nuevo
+
+**Estado instancia** (lo que se genera al usar el template para un proyecto):
+- `.env` con valores reales (`N8N_ENCRYPTION_KEY`, contraseñas, `N8N_API_KEY`)
+- `.mcp.json` con valores reales (placeholders reemplazados por `init.sh`)
+- `volumes/n8n_data/` y `volumes/postgres_data/` con datos de PostgreSQL y n8n
+- Todo en `.gitignore`, nunca se commitea
+
+### Ciclo de vida a documentar
+
+```
+[NUEVO PROYECTO]
+  git clone n8n-shbase → mi-proyecto/
+  make init              # genera .env, claves, configura .mcp.json
+  make up                # levanta n8n + postgres
+  → configurar n8n en UI, generar API key
+  make init              # segunda pasada con N8N_API_KEY
+  → trabajar...
+
+[LIMPIAR / PUBLICAR TEMPLATE]
+  make reset             # vuelve al estado template limpio
+  git push               # repo queda publicable/reutilizable
+```
+
+### Comandos Makefile a documentar
+| Comando | Descripción |
+|---|---|
+| `make init` | Setup inicial: crea `.env`, genera claves, configura `.mcp.json` |
+| `make up` | Levanta los servicios en background |
+| `make down` | Detiene los servicios |
+| `make restart` | Reinicia los servicios |
+| `make logs` | Logs en tiempo real |
+| `make status` | Estado de los contenedores |
+| `make reset` | Revierte al estado template (con confirmación) |
+| `make reset-hard` | Revierte al estado template (sin confirmación) |
+
+### Tabla de puertos a incluir
+Rango reservado `5678–5699` para instancias n8n locales.
+Ejemplo orientativo (cada proyecto define su `N8N_PORT` en su `.env`):
+| Puerto | Proyecto |
+|---|---|
+| 5678 | notesmd |
+| 5679 | gastos-personal |
+| 5680 | erp-interno |
+| 5681–5699 | disponibles |
+
+### Advertencia crítica a destacar
+`N8N_ENCRYPTION_KEY` — generada una sola vez por `init.sh`. Si se pierde o se regenera con la instancia ya en uso, todas las credenciales almacenadas en n8n quedan ilegibles. Guardar copia segura fuera del repo.
+
+---
+
 *Fuentes consultadas: czlonkowski/n8n-mcp (DeepWiki), n8n-io/n8n-docs (DeepWiki), plan-base.md*
-*Decisiones actualizadas: 2026-03-13*
+*Decisiones actualizadas: 2026-03-17*

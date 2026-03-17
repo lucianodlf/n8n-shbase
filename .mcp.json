@@ -7,8 +7,8 @@
         "MCP_MODE": "stdio",
         "LOG_LEVEL": "error",
         "DISABLE_CONSOLE_OUTPUT": "true",
-        "N8N_API_URL": "http://localhost:N8N_PORT_PLACEHOLDER",
-        "N8N_API_KEY": "N8N_API_KEY_PLACEHOLDER"
+        "N8N_API_URL": "http://localhost:5678",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjE1ODMwYi0wYjlkLTQ2MDEtYjc5Ny1iNGNhZWFlZTZmNmQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMDg5ZWMwNzAtNDQ0Yi00Y2I2LTk4Y2ItNDRhNDZlYjVlZjhhIiwiaWF0IjoxNzczNzgxMjI3fQ.Mkxj-NYlqxoPfVYxAZupiiaoE8zDEBnEjKJtdhKyRAI"
       }
     }
   }

@@ -62,4 +62,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./volumes/postgres_data
+      device: ./volumes/postgres_data/pgdata
