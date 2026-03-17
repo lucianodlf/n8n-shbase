@@ -1,0 +1,15 @@
+# Variables de entorno (contienen secretos)
+.env
+
+# Volúmenes de datos (generados en runtime)
+volumes/
+
+# Archivos locales montados en el container
+local-files/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
