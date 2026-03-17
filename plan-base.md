@@ -67,6 +67,39 @@ El flujo de desarrollo se optimizará mediante el uso de Model Context Protocol 
 - https://docs.n8n.io/hosting/configuration/user-management-self-hosted/
 - https://docs.n8n.io/hosting/starter-kits/ai-starter-kit/
 
+### Ideas / Features Futuros
+
+#### CLI nativa para n8n-shbase
+
+**Objetivo inferido:** reemplazar el Makefile + scripts Bash actuales por una herramienta de línea de comandos propia (`n8n-shbase` o `nsh`) que gestione el ciclo de vida de las instancias con subcomandos claros (`init`, `up`, `down`, `reset`, `status`...), distribución como binario único sin dependencias, y potencialmente una TUI interactiva para gestionar múltiples instancias desde un solo lugar.
+
+**Análisis de opciones:**
+
+| Opción | Ventaja principal | Desventaja para este caso |
+|---|---|---|
+| **Go + Cobra** | Binario estático, estándar de infraestructura (Docker/K8s usan esto), excelente para wrappers de docker compose | Curva de aprendizaje si no hay experiencia previa en Go |
+| **Rust + Clap** | Máximo rendimiento y seguridad de memoria | Complejidad innecesaria para una CLI de orquestación de Docker |
+| **Node.js/TS + oclif** | Desarrollo rápido, familiar para devs web | Requiere Node.js en el sistema destino (o bundle pesado) |
+| **Bash + Gum** | Mínimo cambio desde el estado actual, interactividad visual con poco esfuerzo | Sigue siendo un script con dependencias externas; no es un binario distribuible |
+| **Just** | Reemplaza Makefile con sintaxis más limpia, sin necesidad de compilar nada | Es solo un command runner, no permite lógica compleja ni TUI |
+
+**Recomendación: Go + Cobra (+ Bubble Tea opcional)**
+
+Go es la elección más adecuada para este caso por las siguientes razones:
+
+1. **Alineación con el ecosistema**: la CLI wrappea `docker compose` — el mismo lenguaje que usa Docker. Los patrones son idénticos.
+2. **Binario estático**: se distribuye como un único ejecutable sin requerir Go, Node.js ni ningún runtime en el sistema donde se use. Ideal para que cualquier colaborador del proyecto pueda usarlo clonando solo el repo.
+3. **Cobra maneja la estructura de subcomandos** (`nsh init`, `nsh up`, `nsh reset`) con help automático y autocompletado sin trabajo extra.
+4. **Bubble Tea** (de Charm.sh) permitiría agregar a futuro una TUI para listar y gestionar múltiples instancias activas visualmente — muy útil cuando haya varios proyectos corriendo en paralelo.
+5. **Madurez y ejemplos**: abundante documentación y proyectos de referencia (el propio CLI de GitHub, Terraform, etc. siguen este patrón).
+
+**Scope sugerido para una primera versión:**
+- Subcomandos: `init`, `up`, `down`, `restart`, `logs`, `status`, `reset`
+- Lectura de configuración desde `.env` (con Viper)
+- Sin TUI en v1 — agregar con Bubble Tea en v2 si se valida la necesidad
+
+**No implementar hasta:** completar y validar el template base con Bash/Makefile. La CLI es una mejora de UX, no un prerequisito funcional.
+
 ### Objetivos:
 - Analizar en profundidad esta informacion y los objetivos propuestos para determinar una propuesta de implementacion que los satisfaga. Buscar en internet sobre otras fuentes y recursos de ser necesario.
 - Escribir en un documento session.md en .agents/working-context/init/ el analisis y las opciones propuestas.
