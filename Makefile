@@ -10,7 +10,8 @@ help: ## Muestra esta ayuda
 	@echo "  n8n-shbase — Comandos disponibles"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+		| sed 's/.*:\([a-zA-Z_-]*\):.*## /\1:/' \
+		| awk 'BEGIN {FS = ":"}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 
 init: ## Inicializa la instancia: crea .env, genera claves, configura .mcp.json
