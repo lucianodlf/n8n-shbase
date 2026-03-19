@@ -122,6 +122,11 @@ El template incluye `.mcp.json` preconfigurado con [n8n-mcp](https://github.com/
 - Validar configuraciones
 - Ejecutar tests
 
+**Documentación de referencia:**
+- [n8n-mcp en DeepWiki](https://deepwiki.com/czlonkowski/n8n-mcp) — arquitectura, herramientas disponibles e integración
+- [n8n en DeepWiki](https://deepwiki.com/n8n-io/n8n) — internals de la plataforma
+- [n8n-docs en DeepWiki](https://deepwiki.com/n8n-io/n8n-docs) — documentación oficial de self-hosting, variables de entorno, webhooks
+
 ### Modo npx (por defecto)
 
 Requiere Node.js instalado en el host. Es el modo por defecto — sin overhead de container adicional.
@@ -211,6 +216,22 @@ Para exponer n8n en producción se requiere:
 4. Configurar `N8N_PROTOCOL=https` y `N8N_HOST=n8n.mi-dominio.com`
 
 Ver `docker-compose.yml` comentarios para una estructura base con Traefik (Opción B).
+
+## Referencias
+
+### n8n
+- [Documentación oficial — Docker self-hosting](https://docs.n8n.io/hosting/installation/docker/)
+- [Variables de entorno](https://docs.n8n.io/hosting/configuration/environment-variables/)
+- [User management self-hosted](https://docs.n8n.io/hosting/configuration/user-management-self-hosted/)
+- [n8n en DeepWiki](https://deepwiki.com/n8n-io/n8n)
+- [n8n-docs en DeepWiki](https://deepwiki.com/n8n-io/n8n-docs)
+
+### n8n-mcp
+- [Repositorio czlonkowski/n8n-mcp](https://github.com/czlonkowski/n8n-mcp)
+- [n8n-mcp en DeepWiki](https://deepwiki.com/czlonkowski/n8n-mcp)
+
+### Integración multi-repo
+- [`docs/integracion-multi-repo.md`](docs/integracion-multi-repo.md) — submodules, redes Docker compartidas, coordinación de stacks
 
 ## Roadmap
 
