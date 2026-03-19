@@ -17,6 +17,8 @@ Template repository para desplegar instancias [n8n](https://n8n.io) aisladas por
 
 ## Inicio rápido
 
+### Opción A: repo independiente por proyecto (recomendado para proyectos nuevos)
+
 ```bash
 # 1. Clonar como base de tu proyecto
 git clone https://github.com/tu-usuario/n8n-shbase mi-proyecto
@@ -37,6 +39,41 @@ make up
 # 5. Abrir n8n en el navegador
 open http://localhost:5678
 ```
+
+### Opción B: como submodule dentro de un proyecto existente
+
+Para integrar n8n-shbase en un proyecto que ya tiene su propio repositorio git:
+
+```bash
+# Dentro del proyecto existente (ej: notesmd/)
+git submodule add https://github.com/tu-usuario/n8n-shbase services/n8n
+git submodule update --init
+
+# Inicializar la instancia
+cd services/n8n
+make init
+# editar services/n8n/.env con los valores del proyecto
+make up
+```
+
+Al clonar el proyecto en otra máquina:
+
+```bash
+git clone --recurse-submodules https://github.com/tu-usuario/notesmd
+# o si ya estaba clonado:
+git submodule update --init --recursive
+```
+
+Para actualizar n8n-shbase a la última versión:
+
+```bash
+cd services/n8n && git pull origin main && cd ../..
+git add services/n8n && git commit -m "chore: actualizar n8n-shbase"
+```
+
+> Ver [`docs/integracion-multi-repo.md`](docs/integracion-multi-repo.md) para la guía completa:
+> coordinación de múltiples `docker-compose.yml`, redes Docker compartidas y
+> centralización de configuración en `.env`.
 
 ## Comandos disponibles
 
