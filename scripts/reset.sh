@@ -77,11 +77,16 @@ fi
 
 # -----------------------------------------------------------------------------
 # 4. Limpiar volúmenes de datos
+# Los archivos son propiedad del usuario interno del container (uid 999),
+# por lo que se usa un container efímero para eliminarlos sin requerir sudo.
 # -----------------------------------------------------------------------------
 for dir in volumes/n8n_data volumes/postgres_data; do
   TARGET="$ROOT_DIR/$dir"
   if [ -d "$TARGET" ]; then
-    find "$TARGET" -mindepth 1 ! -name '.gitkeep' -delete 2>/dev/null || true
+    docker run --rm -v "$TARGET:/target" alpine sh -c "rm -rf /target/*" 2>/dev/null || {
+      warn "$dir: no se pudo limpiar automáticamente. Ejecutá manualmente: sudo rm -rf $TARGET/*"
+      continue
+    }
     info "$dir limpiado"
   fi
 done
