@@ -56,6 +56,26 @@ make init
 make up
 ```
 
+#### `.mcp.json` en el proyecto padre
+
+Al usar como submodule, lo habitual es trabajar con Claude Code desde la raíz del proyecto padre, no desde `services/n8n/`. En ese caso el `.mcp.json` del submodule no es leído por Claude Code.
+
+`make init` resuelve esto automáticamente: en la segunda pasada (cuando `N8N_API_KEY` ya está configurada), escribe el `.mcp.json` de n8n-mcp directamente en el directorio raíz del proyecto padre.
+
+El path destino se determina con la variable `PARENT_MCP_PATH` en el `.env` del submodule:
+
+```env
+# Default — estructura estándar (raiz/services/n8n/)
+PARENT_MCP_PATH=../../.mcp.json
+
+# Si el submodule está en otro nivel de anidamiento, ajustar:
+# PARENT_MCP_PATH=../../../.mcp.json
+```
+
+Si la variable no está definida o está en blanco, se asume `../../.mcp.json` (estructura estándar `services/n8n`).
+
+> **Nota:** el `.mcp.json` generado en el padre contiene la `N8N_API_KEY` en texto plano. Asegurarse de que el `.gitignore` del proyecto padre excluya `.mcp.json` o que el archivo no sea commiteado.
+
 Al clonar el proyecto en otra máquina:
 
 ```bash
@@ -183,6 +203,7 @@ Variables críticas:
 | `N8N_ENCRYPTION_KEY` | Generada por `init.sh`. **No cambiar** una vez que la instancia tiene credenciales |
 | `N8N_API_KEY` | Generada desde la UI de n8n post-deploy |
 | `DB_POSTGRESDB_PASSWORD` | Contraseña de PostgreSQL |
+| `PARENT_MCP_PATH` | Path relativo al `.mcp.json` del proyecto padre (uso como submodule). Default: `../../.mcp.json` |
 
 > ⚠️ **`N8N_ENCRYPTION_KEY`**: generada una sola vez. Si se pierde o regenera con la instancia en uso, todas las credenciales almacenadas en n8n quedan ilegibles. Guardar copia segura fuera del repo.
 

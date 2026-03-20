@@ -73,10 +73,12 @@ fi
 # -----------------------------------------------------------------------------
 # 5. Leer valores del .env para reemplazar placeholders en .mcp.json
 # -----------------------------------------------------------------------------
-source <(grep -E '^(N8N_PORT|N8N_API_KEY)=' "$ENV_FILE" | sed 's/[[:space:]]//g')
+source <(grep -E '^(N8N_PORT|N8N_API_KEY|PARENT_MCP_PATH)=' "$ENV_FILE" | sed 's/[[:space:]]//g')
 
 N8N_PORT="${N8N_PORT:-5678}"
 N8N_API_KEY="${N8N_API_KEY:-}"
+# Default: asumir estructura services/n8n dentro del proyecto padre
+PARENT_MCP_PATH="${PARENT_MCP_PATH:-../../.mcp.json}"
 
 MCP_FILE="$ROOT_DIR/.mcp.json"
 
@@ -96,9 +98,41 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# 5b. Propagar configuración n8n-mcp al .mcp.json del proyecto padre
+# -----------------------------------------------------------------------------
+PARENT_MCP_FILE="$ROOT_DIR/$PARENT_MCP_PATH"
+PARENT_MCP_FILE="$(cd "$(dirname "$PARENT_MCP_FILE")" 2>/dev/null && pwd)/$(basename "$PARENT_MCP_FILE")" || true
+
+MCP_BLOCK="{
+  \"mcpServers\": {
+    \"n8n-mcp\": {
+      \"command\": \"npx\",
+      \"args\": [\"n8n-mcp\"],
+      \"env\": {
+        \"MCP_MODE\": \"stdio\",
+        \"LOG_LEVEL\": \"error\",
+        \"DISABLE_CONSOLE_OUTPUT\": \"true\",
+        \"N8N_API_URL\": \"http://localhost:${N8N_PORT}\",
+        \"N8N_API_KEY\": \"${N8N_API_KEY}\"
+      }
+    }
+  }
+}"
+
+PARENT_DIR="$(dirname "$PARENT_MCP_FILE")"
+if [ ! -d "$PARENT_DIR" ]; then
+  warn "Directorio padre no encontrado (${PARENT_DIR}). Omitiendo propagación a .mcp.json del padre."
+elif [ -z "$N8N_API_KEY" ]; then
+  warn "N8N_API_KEY vacía — no se escribe .mcp.json en el proyecto padre hasta tener la clave."
+else
+  echo "$MCP_BLOCK" > "$PARENT_MCP_FILE"
+  info ".mcp.json escrito en el proyecto padre: ${PARENT_MCP_FILE}"
+fi
+
+# -----------------------------------------------------------------------------
 # 6. Crear directorios de volúmenes si no existen
 # -----------------------------------------------------------------------------
-mkdir -p "$ROOT_DIR/volumes/n8n_data" "$ROOT_DIR/volumes/postgres_data" "$ROOT_DIR/local-files"
+mkdir -p "$ROOT_DIR/volumes/n8n_data" "$ROOT_DIR/volumes/postgres_data/pgdata" "$ROOT_DIR/local-files"
 
 # -----------------------------------------------------------------------------
 # 7. Instrucciones finales
