@@ -80,21 +80,32 @@ N8N_API_KEY="${N8N_API_KEY:-}"
 # Default: asumir estructura services/n8n dentro del proyecto padre
 PARENT_MCP_PATH="${PARENT_MCP_PATH:-../../.mcp.json}"
 
+# Si N8N_API_KEY está vacía en .env pero ya existe un valor en .mcp.json, usarlo como fallback
+if [ -z "$N8N_API_KEY" ] && [ -f "$ROOT_DIR/.mcp.json" ]; then
+  N8N_API_KEY=$(grep -o '"N8N_API_KEY": *"[^"]*"' "$ROOT_DIR/.mcp.json" | cut -d'"' -f4)
+  if [ -n "$N8N_API_KEY" ]; then
+    info "N8N_API_KEY leída desde .mcp.json existente."
+  fi
+fi
+
+MCP_EXAMPLE="$ROOT_DIR/.mcp.json.example"
 MCP_FILE="$ROOT_DIR/.mcp.json"
 
-if [ -f "$MCP_FILE" ]; then
-  sed -i "s|N8N_PORT_PLACEHOLDER|${N8N_PORT}|g" "$MCP_FILE"
+if [ -f "$MCP_EXAMPLE" ]; then
+  sed \
+    -e "s|N8N_PORT_PLACEHOLDER|${N8N_PORT}|g" \
+    -e "s|N8N_API_KEY_PLACEHOLDER|${N8N_API_KEY}|g" \
+    "$MCP_EXAMPLE" > "$MCP_FILE"
 
   if [ -n "$N8N_API_KEY" ]; then
-    sed -i "s|N8N_API_KEY_PLACEHOLDER|${N8N_API_KEY}|g" "$MCP_FILE"
-    info ".mcp.json actualizado con N8N_PORT=${N8N_PORT} y N8N_API_KEY configurada."
+    info ".mcp.json generado con N8N_PORT=${N8N_PORT} y N8N_API_KEY configurada."
   else
-    warn ".mcp.json actualizado con N8N_PORT=${N8N_PORT}, pero N8N_API_KEY está vacía."
+    warn ".mcp.json generado con N8N_PORT=${N8N_PORT}, pero N8N_API_KEY está vacía."
     warn "Generá la API key desde la UI de n8n (Settings → API → Create API Key),"
     warn "agrégala a .env como N8N_API_KEY=... y reejecutá este script."
   fi
 else
-  warn ".mcp.json no encontrado, omitiendo configuración de n8n-mcp."
+  warn ".mcp.json.example no encontrado, omitiendo configuración de n8n-mcp."
 fi
 
 # -----------------------------------------------------------------------------

@@ -15,3 +15,6 @@ local-files/
 Thumbs.db
 
 .claude/settings.local.json
+
+# .mcp.json contiene credenciales reales — generado por init.sh desde .mcp.json.example
+.mcp.json

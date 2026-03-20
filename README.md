@@ -129,18 +129,20 @@ make up                → levanta n8n + postgres
   completar setup      → crear usuario admin en el wizard inicial
   generar API key      → Settings → API → Create API Key
   agregar al .env      → N8N_API_KEY=...
-make init              → segunda pasada: configura .mcp.json con la API key
+make init              → segunda pasada: genera .mcp.json con la API key
   reiniciar Claude Code → n8n-mcp queda activo
 ```
 
 ## Integración con Claude Code (n8n-mcp)
 
-El template incluye `.mcp.json` preconfigurado con [n8n-mcp](https://github.com/czlonkowski/n8n-mcp), que permite a Claude Code interactuar directamente con n8n:
+El template integra [n8n-mcp](https://github.com/czlonkowski/n8n-mcp), que permite a Claude Code interactuar directamente con n8n:
 
 - Crear y modificar workflows
 - Buscar nodos y templates
 - Validar configuraciones
 - Ejecutar tests
+
+`make init` genera el archivo `.mcp.json` con las credenciales reales a partir del template `.mcp.json.example`. El `.mcp.json` generado está en `.gitignore` — nunca se commitea.
 
 **Documentación de referencia:**
 - [n8n-mcp en DeepWiki](https://deepwiki.com/czlonkowski/n8n-mcp) — arquitectura, herramientas disponibles e integración
@@ -149,44 +151,30 @@ El template incluye `.mcp.json` preconfigurado con [n8n-mcp](https://github.com/
 
 ### Modo npx (por defecto)
 
-Requiere Node.js instalado en el host. Es el modo por defecto — sin overhead de container adicional.
-
-```json
-{
-  "mcpServers": {
-    "n8n-mcp": {
-      "command": "npx",
-      "args": ["n8n-mcp"],
-      "env": {
-        "MCP_MODE": "stdio",
-        "N8N_API_URL": "http://localhost:{N8N_PORT}",
-        "N8N_API_KEY": "{tu-api-key}"
-      }
-    }
-  }
-}
-```
+Requiere Node.js en el host. Template: `.mcp.json.example`.
 
 ### Modo Docker stdio (alternativa)
 
-Si no tenés Node.js en el host. El archivo `.mcp.docker.json.example` contiene la configuración lista para usar. Nota: usa `host.docker.internal` en lugar de `localhost` para alcanzar n8n desde dentro del container.
+Si no tenés Node.js en el host. Template: `.mcp.docker.json.example`. Usa `host.docker.internal` en lugar de `localhost` para alcanzar n8n desde dentro del container.
+
+Para usar el modo Docker: copiar `.mcp.docker.json.example` a `.mcp.json.example` antes de correr `make init`.
 
 ## Estado template vs instancia
 
 El repo tiene dos estados diferenciados:
 
 **Estado template** (lo que se commitea):
-- `.env.example`, `.mcp.json` con placeholders, `docker-compose.yml`, `scripts/`
+- `.env.example`, `.mcp.json.example`, `.mcp.docker.json.example`, `docker-compose.yml`, `scripts/`
 - Sin datos de instancia — listo para clonar y reutilizar
 
 **Estado instancia** (ignorado por git):
-- `.env` con claves reales, `volumes/` con datos de n8n y PostgreSQL
+- `.env` con claves reales, `.mcp.json` con credenciales, `volumes/` con datos de n8n y PostgreSQL
 - Generado por `make init` + `make up`
 
 Para volver al estado template antes de commitear:
 
 ```bash
-make reset   # detiene containers, elimina .env, limpia volúmenes, restaura placeholders
+make reset   # detiene containers, elimina .env y .mcp.json, limpia volúmenes
 git push     # repo queda limpio y reutilizable
 ```
 

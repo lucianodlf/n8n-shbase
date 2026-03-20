@@ -2,7 +2,7 @@
 # reset.sh — Revierte el repositorio al estado de template limpio.
 # Elimina toda configuración específica de la instancia actual:
 #   - .env (claves reales, contraseñas, API keys)
-#   - .mcp.json restaurado a placeholders
+#   - .mcp.json eliminado (generado por init.sh, contiene credenciales reales)
 #   - Volúmenes de datos (postgres_data, n8n_data)
 #   - Archivos locales montados en el container
 #
@@ -39,7 +39,7 @@ if [ "$HARD" = false ]; then
   echo ""
   echo "  Se eliminarán / restaurarán:"
   echo "    - .env"
-  echo "    - .mcp.json (placeholders restaurados)"
+  echo "    - .mcp.json (eliminado — regenerar con 'make init')"
   echo "    - volumes/n8n_data/"
   echo "    - volumes/postgres_data/"
   echo "    - local-files/"
@@ -67,31 +67,12 @@ if [ -f "$ROOT_DIR/.env" ]; then
 fi
 
 # -----------------------------------------------------------------------------
-# 3. Restaurar .mcp.json a placeholders
+# 3. Eliminar .mcp.json generado (contiene credenciales reales)
 # -----------------------------------------------------------------------------
 MCP_FILE="$ROOT_DIR/.mcp.json"
 if [ -f "$MCP_FILE" ]; then
-  # Extraer el puerto actual para mostrarlo en el log (informativo)
-  CURRENT_PORT=$(grep -oP '"N8N_API_URL":\s*"http://localhost:\K[0-9]+' "$MCP_FILE" 2>/dev/null || echo "?")
-
-  cat > "$MCP_FILE" <<'MCPEOF'
-{
-  "mcpServers": {
-    "n8n-mcp": {
-      "command": "npx",
-      "args": ["n8n-mcp"],
-      "env": {
-        "MCP_MODE": "stdio",
-        "LOG_LEVEL": "error",
-        "DISABLE_CONSOLE_OUTPUT": "true",
-        "N8N_API_URL": "http://localhost:N8N_PORT_PLACEHOLDER",
-        "N8N_API_KEY": "N8N_API_KEY_PLACEHOLDER"
-      }
-    }
-  }
-}
-MCPEOF
-  info ".mcp.json restaurado a placeholders (tenía puerto: $CURRENT_PORT)"
+  rm "$MCP_FILE"
+  info ".mcp.json eliminado (regenerar con 'make init' cuando sea necesario)"
 fi
 
 # -----------------------------------------------------------------------------
