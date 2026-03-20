@@ -148,6 +148,20 @@ elif [ -z "$N8N_API_KEY" ]; then
 else
   echo "$MCP_BLOCK" > "$PARENT_MCP_FILE"
   info ".mcp.json escrito en el proyecto padre: ${PARENT_MCP_FILE}"
+
+  # Asegurar que .mcp.json esté ignorado en el .gitignore del padre
+  PARENT_GITIGNORE="$PARENT_DIR/.gitignore"
+  if [ -f "$PARENT_GITIGNORE" ]; then
+    if ! grep -qxF ".mcp.json" "$PARENT_GITIGNORE"; then
+      echo "" >> "$PARENT_GITIGNORE"
+      echo "# Generado por n8n-shbase/init.sh — contiene credenciales reales" >> "$PARENT_GITIGNORE"
+      echo ".mcp.json" >> "$PARENT_GITIGNORE"
+      info ".mcp.json agregado al .gitignore del proyecto padre"
+    fi
+  else
+    printf "# Generado por n8n-shbase/init.sh — contiene credenciales reales\n.mcp.json\n" > "$PARENT_GITIGNORE"
+    info ".gitignore creado en el proyecto padre con .mcp.json ignorado"
+  fi
 fi
 
 # -----------------------------------------------------------------------------
