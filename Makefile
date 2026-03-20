@@ -18,7 +18,14 @@ init: ## Inicializa la instancia: crea .env, genera claves, configura .mcp.json
 	@bash scripts/init.sh
 
 up: ## Levanta los servicios en background
-	@docker compose up -d
+	@docker compose up -d 2>&1 | tee /tmp/n8n-up.log; \
+	if grep -q "port is already allocated" /tmp/n8n-up.log; then \
+		echo ""; \
+		echo "⚠️  Puerto ya en uso. Otra instancia n8n puede estar corriendo en el mismo puerto."; \
+		echo "   Verificá con: docker ps | grep n8n"; \
+		echo "   O cambiá N8N_PORT en .env y reejecutá make init && make up"; \
+		exit 1; \
+	fi
 
 down: ## Detiene los servicios
 	@docker compose down

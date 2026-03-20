@@ -73,10 +73,20 @@ fi
 # -----------------------------------------------------------------------------
 # 5. Leer valores del .env para reemplazar placeholders en .mcp.json
 # -----------------------------------------------------------------------------
-source <(grep -E '^(N8N_PORT|N8N_API_KEY|PARENT_MCP_PATH)=' "$ENV_FILE" | sed 's/[[:space:]]//g')
+source <(grep -E '^(N8N_PORT|N8N_API_KEY|PARENT_MCP_PATH|WEBHOOK_URL)=' "$ENV_FILE" | sed 's/[[:space:]]//g')
 
 N8N_PORT="${N8N_PORT:-5678}"
 N8N_API_KEY="${N8N_API_KEY:-}"
+
+# Generar WEBHOOK_URL automáticamente si está vacío o apunta a un puerto distinto
+CURRENT_WEBHOOK=$(grep -E '^WEBHOOK_URL=' "$ENV_FILE" | cut -d'=' -f2 | tr -d '[:space:]')
+if [ -z "$CURRENT_WEBHOOK" ] || echo "$CURRENT_WEBHOOK" | grep -qE '^http://localhost:[0-9]+/?$'; then
+  NEW_WEBHOOK="http://localhost:${N8N_PORT}/"
+  if [ "$CURRENT_WEBHOOK" != "$NEW_WEBHOOK" ]; then
+    sed -i "s|^WEBHOOK_URL=.*|WEBHOOK_URL=${NEW_WEBHOOK}|" "$ENV_FILE"
+    info "WEBHOOK_URL actualizado a ${NEW_WEBHOOK}"
+  fi
+fi
 # Default: asumir estructura services/n8n dentro del proyecto padre
 PARENT_MCP_PATH="${PARENT_MCP_PATH:-../../.mcp.json}"
 
