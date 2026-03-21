@@ -19,7 +19,7 @@ Resumen de reglas críticas:
 - `make reset` antes de cualquier commit final para limpiar datos de instancia.
 
 ## Workflow de trabajo
-Directorio: `.agents/working-context` (sobreescribible con `WORKFLOW_DIR` en `.env`)
+Directorio: `.agents/working-progress` (sobreescribible con `WORKFLOW_DIR` en `.env`)
 Sesiones: `init` · `feat-[nombre]` · `feat-[nombre]-[issue]` · `fix-[nombre]` · `refactor-[nombre]`
 Archivos por sesión: `prompt.md` · `research.md` · `plan.md` · `fase-N-plan.md` · `roadmap.md`
 Nueva sesión: `/ns` — crea subdirectorio y `prompt.md`
