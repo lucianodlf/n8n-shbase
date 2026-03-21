@@ -7,12 +7,15 @@ Los aprendizajes técnicos, contexto y decisiones de este proyecto están en:
 
 Consultar `MEMORY.md` en ese directorio para el índice completo.
 
-## Reglas de trabajo
+## n8n — Conocimiento operativo
 
-- Antes de crear workflows con nodos Webhook vía MCP, generar un UUID para `webhookId`.
-- Después de crear un workflow, activarlo explícitamente vía `POST /api/v1/workflows/:id/activate`.
-- Ante problemas de webhook 404, verificar `webhook_entity` en la DB antes de asumir problemas de red.
-- El directorio de datos de PostgreSQL es `volumes/postgres_data/pgdata` (subdirectorio, no raíz directa).
+Aprendizajes clave sobre workflows, MCP y operaciones frecuentes:
+`n8n-knowledge.md` (raíz del submodule) — leer antes de trabajar con workflows o ante errores.
+
+Resumen de reglas críticas:
+- Webhook node: siempre incluir `webhookId` UUID explícito al crear vía MCP/API.
+- Activar workflows explícitamente post-creación vía `POST /api/v1/workflows/:id/activate`.
+- Ante webhook 404: verificar tabla `webhook_entity` en la DB antes de asumir problema de red.
 - `make reset` antes de cualquier commit final para limpiar datos de instancia.
 
 ## Workflow de trabajo

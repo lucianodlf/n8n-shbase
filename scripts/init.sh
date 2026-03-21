@@ -142,25 +142,47 @@ MCP_BLOCK="{
 
 PARENT_DIR="$(dirname "$PARENT_MCP_FILE")"
 if [ ! -d "$PARENT_DIR" ]; then
-  warn "Directorio padre no encontrado (${PARENT_DIR}). Omitiendo propagación a .mcp.json del padre."
-elif [ -z "$N8N_API_KEY" ]; then
-  warn "N8N_API_KEY vacía — no se escribe .mcp.json en el proyecto padre hasta tener la clave."
+  warn "Directorio padre no encontrado (${PARENT_DIR}). Omitiendo propagación al proyecto padre."
 else
-  echo "$MCP_BLOCK" > "$PARENT_MCP_FILE"
-  info ".mcp.json escrito en el proyecto padre: ${PARENT_MCP_FILE}"
+  # Path relativo del submodule desde el directorio padre
+  SUBMODULE_REL="${ROOT_DIR#$PARENT_DIR/}"
 
-  # Asegurar que .mcp.json esté ignorado en el .gitignore del padre
-  PARENT_GITIGNORE="$PARENT_DIR/.gitignore"
-  if [ -f "$PARENT_GITIGNORE" ]; then
-    if ! grep -qxF ".mcp.json" "$PARENT_GITIGNORE"; then
-      echo "" >> "$PARENT_GITIGNORE"
-      echo "# Generado por n8n-shbase/init.sh — contiene credenciales reales" >> "$PARENT_GITIGNORE"
-      echo ".mcp.json" >> "$PARENT_GITIGNORE"
-      info ".mcp.json agregado al .gitignore del proyecto padre"
+  # Agregar referencia a n8n-knowledge.md en el CLAUDE.md del padre (siempre)
+  PARENT_CLAUDE="$PARENT_DIR/CLAUDE.md"
+  N8N_KNOWLEDGE_REF="## n8n — Conocimiento operativo
+Ver \`${SUBMODULE_REL}/n8n-knowledge.md\` para aprendizajes sobre workflows, MCP y errores conocidos.
+Actualizar ese archivo desde cualquier proyecto y hacer push a n8n-shbase para compartir el conocimiento."
+
+  if [ -f "$PARENT_CLAUDE" ]; then
+    if ! grep -q "n8n-knowledge.md" "$PARENT_CLAUDE"; then
+      echo "" >> "$PARENT_CLAUDE"
+      echo "$N8N_KNOWLEDGE_REF" >> "$PARENT_CLAUDE"
+      info "Referencia a n8n-knowledge.md agregada al CLAUDE.md del proyecto padre"
     fi
   else
-    printf "# Generado por n8n-shbase/init.sh — contiene credenciales reales\n.mcp.json\n" > "$PARENT_GITIGNORE"
-    info ".gitignore creado en el proyecto padre con .mcp.json ignorado"
+    echo "$N8N_KNOWLEDGE_REF" > "$PARENT_CLAUDE"
+    info "CLAUDE.md creado en el proyecto padre con referencia a n8n-knowledge.md"
+  fi
+
+  # .mcp.json y .gitignore del padre — solo si N8N_API_KEY está disponible
+  if [ -z "$N8N_API_KEY" ]; then
+    warn "N8N_API_KEY vacía — no se escribe .mcp.json en el proyecto padre hasta tener la clave."
+  else
+    echo "$MCP_BLOCK" > "$PARENT_MCP_FILE"
+    info ".mcp.json escrito en el proyecto padre: ${PARENT_MCP_FILE}"
+
+    PARENT_GITIGNORE="$PARENT_DIR/.gitignore"
+    if [ -f "$PARENT_GITIGNORE" ]; then
+      if ! grep -qxF ".mcp.json" "$PARENT_GITIGNORE"; then
+        echo "" >> "$PARENT_GITIGNORE"
+        echo "# Generado por n8n-shbase/init.sh — contiene credenciales reales" >> "$PARENT_GITIGNORE"
+        echo ".mcp.json" >> "$PARENT_GITIGNORE"
+        info ".mcp.json agregado al .gitignore del proyecto padre"
+      fi
+    else
+      printf "# Generado por n8n-shbase/init.sh — contiene credenciales reales\n.mcp.json\n" > "$PARENT_GITIGNORE"
+      info ".gitignore creado en el proyecto padre con .mcp.json ignorado"
+    fi
   fi
 fi
 
