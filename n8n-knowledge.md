@@ -45,6 +45,24 @@ Generar UUID con: `python3 -c "import uuid; print(uuid.uuid4())"`
 
 ---
 
+## Nodos — Telegram Polling (getUpdates)
+
+### `$getWorkflowStaticData` no persiste el offset de forma confiable
+En la versión 2.40.1 self-hosted con Schedule Trigger, `$getWorkflowStaticData('global')` no persiste correctamente entre ejecuciones — el valor siempre arranca en `undefined` (offset 0), lo que hace que `getUpdates` devuelva toda la cola de mensajes en cada ciclo.
+
+**Solución verificada:** usar **Data Tables** (`n8n-nodes-base.dataTable`) para persistir el `last_update_id`.
+1. Crear la tabla manualmente en la UI de n8n (Settings → Data tables) con columna `last_update_id` (número).
+2. Al inicio del workflow: nodo dataTable con `operation: "get"` para leer el offset.
+3. Al final (ambas ramas, con y sin mensajes): nodo dataTable con `operation: "update"`, filtro `{keyName: "id", condition: "eq", keyValue: "1"}`, columna `last_update_id` mapeada desde `nuevo_offset`.
+
+Parámetros correctos del nodo dataTable:
+- `resource: "row"` (requerido)
+- `dataTableId: {mode: "id", value: "<tableId>"}` (resourceLocator)
+- `columns: {mappingMode: "defineBelow", value: {last_update_id: "={{ $json.nuevo_offset }}"}}` (para update)
+- `filters: {conditions: [{keyName: "id", condition: "eq", keyValue: "1"}]}` (fixedCollection)
+
+---
+
 ## Errores conocidos
 
 ### Webhook 404 "not registered" aunque el workflow esté activo
