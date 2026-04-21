@@ -3,6 +3,8 @@ services:
     image: postgres:16
     container_name: ${PROJECT_NAME}-postgres
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_DB: ${DB_POSTGRESDB_DATABASE}
       POSTGRES_USER: ${DB_POSTGRESDB_USER}
@@ -19,8 +21,7 @@ services:
     image: n8nio/n8n:latest
     container_name: ${PROJECT_NAME}-n8n
     restart: unless-stopped
-    ports:
-      - "${N8N_PORT}:5678"
+    network_mode: host
     environment:
       # Base
       N8N_HOST: ${N8N_HOST}
@@ -30,7 +31,7 @@ services:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       # Base de datos
       DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_HOST: 127.0.0.1
       DB_POSTGRESDB_PORT: 5432
       DB_POSTGRESDB_DATABASE: ${DB_POSTGRESDB_DATABASE}
       DB_POSTGRESDB_USER: ${DB_POSTGRESDB_USER}
@@ -43,9 +44,14 @@ services:
       # Zona horaria
       GENERIC_TIMEZONE: ${GENERIC_TIMEZONE}
       TZ: ${GENERIC_TIMEZONE}
+      # Módulos Node.js permitidos en Code nodes
+      NODE_FUNCTION_ALLOW_BUILTIN: "fs"
+      # Forzar IPv4 en resolución DNS (necesario con network_mode: host)
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
     volumes:
       - n8n_data:/home/node/.n8n
       - ./local-files:/files
+      - /home/rafiki/Projects/ia-update-cuentas-personales/scripts/classification.json:/data/classification.json:ro
     depends_on:
       postgres:
         condition: service_healthy
