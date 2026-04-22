@@ -35,10 +35,14 @@ zrok2-stop: ## (temporal) Detiene el proceso zrok2 si está corriendo
 	fi
 
 zrok2-start: ## (temporal) Inicia túnel zrok2 público si no está corriendo
+	@if [ -z "$(ZROK_NAME)" ]; then \
+		echo "❌ ZROK_NAME no definido — configurar en .env antes de ejecutar make start ZROK=1"; \
+		exit 1; \
+	fi
 	@if pgrep -x zrok2 > /dev/null 2>&1; then \
 		echo "ℹ️  zrok2 ya está corriendo, omitiendo."; \
 	else \
-		zrok2 share public http://localhost:5678 -n public:rafikidlf-mygpzrokurl --headless \
+		zrok2 share public http://localhost:$(N8N_PORT) -n public:$(ZROK_NAME) --headless \
 			> /tmp/zrok2-share.log 2>&1 & \
 		ZROK_PID=$$!; \
 		sleep 2; \
