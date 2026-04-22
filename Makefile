@@ -42,6 +42,7 @@ zrok2-start: ## (temporal) Inicia túnel zrok2 público si no está corriendo
 	@if pgrep -x zrok2 > /dev/null 2>&1; then \
 		echo "ℹ️  zrok2 ya está corriendo, omitiendo."; \
 	else \
+		echo "⏳ Iniciando: zrok2 share public http://localhost:$(N8N_PORT) -n public:$(ZROK_NAME)"; \
 		zrok2 share public http://localhost:$(N8N_PORT) -n public:$(ZROK_NAME) --headless \
 			> /tmp/zrok2-share.log 2>&1 & \
 		ZROK_PID=$$!; \
@@ -51,6 +52,7 @@ zrok2-start: ## (temporal) Inicia túnel zrok2 público si no está corriendo
 			cat /tmp/zrok2-share.log; \
 		else \
 			echo "✅ zrok2 tunnel iniciado en background (pid=$$ZROK_PID)"; \
+			echo "   URL pública: https://$(ZROK_NAME).shares.zrok.io"; \
 		fi; \
 	fi
 
